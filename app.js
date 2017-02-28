@@ -15,6 +15,62 @@ var indexAPI = require('./routes/api/index');
 
 var app = express();
 
+// BOTBOTBOT
+
+// API AI
+var apiai = require('apiai');
+
+var appai = apiai(process.env.APIAI_SECRET);
+
+// Telegram
+
+const TelegramBot = require('node-telegram-bot-api');
+
+// replace the value below with the Telegram token you receive from @BotFather
+const token = process.env.TELEGRAM_KEY;
+
+// Create a bot that uses 'polling' to fetch new updates
+const bot = new TelegramBot(token, {
+    polling: true
+});
+
+bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    // send a message to the chat acknowledging receipt of their message
+    var request = appai.textRequest(msg.text, {
+      sessionId: '<unique session id>'
+    });
+
+    let pro = new Promise(function(resolve, reject){
+      request.on('response', function(response) {
+        console.log(response);
+        if (response.result.source == 'agent') {
+          resolve(response)
+        } else {
+          reject('Kamu ngomong apa cuy ?!')
+        }
+      });
+    })
+
+    pro.then(function(response){
+      bot.sendMessage(chatId, response.result.fulfillment.speech);
+      // bot.sendMessage(chatId, response.result.fulfillment.messages[0].speech);
+    }).catch(function(msgs){
+      bot.sendMessage(chatId, msgs);
+
+    })
+
+    request.on('error', function(error) {
+      console.log(error);
+    });
+    request.end();
+
+    // bot.sendMessage(chatId, 'Hi');
+})
+  //
+  // //
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
