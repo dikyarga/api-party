@@ -33,11 +33,14 @@ const token = process.env.TELEGRAM_KEY;
 const bot = new TelegramBot(token, {
     polling: true
 });
+bot.setWebHook(process.env.HEROKU_URL + bot.token);
+console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 bot.onText(/\/start/, function(message) {
     bot.sendMessage(message.chat.id, `<Hallo World/> ${message.from.first_name} You can ask me anything,`
     );
     bot.sendMessage(message.chat.id, `Contoh, kamu siapa ?`);
+
 });
 
 bot.on('message', (msg) => {
@@ -90,7 +93,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// 
+//
 // app.use('/', index);
 // app.use('/users', users);
 // app.use('/api/users', helper.auth, usersAPI);
