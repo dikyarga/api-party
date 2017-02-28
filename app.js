@@ -11,9 +11,12 @@ require('dotenv').config()
 // var index = require('./routes/index');
 // var users = require('./routes/users');
 // var usersAPI = require('./routes/api/users');
-// var indexAPI = require('./routes/api/index');
+var indexAPI = require('./routes/api/index');
 
 var app = express();
+
+let db = require('./models')
+
 
 // BOTBOTBOT
 
@@ -33,18 +36,39 @@ const token = process.env.TELEGRAM_KEY;
 const bot = new TelegramBot(token, {
     polling: true
 });
-bot.setWebHook(process.env.HEROKU_URL + bot.token);
+
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 bot.onText(/\/start/, function(message) {
-    bot.sendMessage(message.chat.id, `<Hallo World/> ${message.from.first_name} You can ask me anything,`
-    );
-    bot.sendMessage(message.chat.id, `Contoh, kamu siapa ?`);
+    db.Telegram.create({
+      userid: parseInt(message.chat.id),
+      username: message.chat.username,
+      chatid: message.message_id,
+      firstname: message.chat.first_name,
+      lastname: message.chat.last_name,
+    }).then(() => {
+      bot.sendMessage(message.chat.id, `<Hallo World/> ${message.from.first_name} ! You can ask me anything,`);
+      bot.sendMessage(message.chat.id, `Contoh, kamu siapa ?`);
+    })
 
 });
 
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
+
+    console.log('-==------------chatid--------------------', chatId);
+    db.Telegram.findOne({
+      where: {
+        userid: parseInt(chatId)
+      }
+    }).then((user) => {
+      console.log('-==------------sama--------------------');
+      db.Chat.create({
+        text:msg.text,
+        chatid: user.id
+      })
+    })
+
     // send a message to the chat acknowledging receipt of their message
     var request = appai.textRequest(msg.text, {
         sessionId: '<unique session id>'
@@ -76,9 +100,6 @@ bot.on('message', (msg) => {
 
     // bot.sendMessage(chatId, 'Hi');
 })
-//
-// //
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -97,7 +118,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/', index);
 // app.use('/users', users);
 // app.use('/api/users', helper.auth, usersAPI);
-// app.use('/api/', indexAPI);
+app.use('/api/', indexAPI);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

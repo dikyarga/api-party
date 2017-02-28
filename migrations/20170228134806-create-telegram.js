@@ -9,10 +9,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       userid: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       chatid: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       firstname: {
         type: Sequelize.STRING
