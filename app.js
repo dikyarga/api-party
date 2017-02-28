@@ -6,12 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 require('dotenv').config()
 
-var helper = require('./helpers/auth')
-
-var index = require('./routes/index');
-var users = require('./routes/users');
-var usersAPI = require('./routes/api/users');
-var indexAPI = require('./routes/api/index');
+// var helper = require('./helpers/auth')
+//
+// var index = require('./routes/index');
+// var users = require('./routes/users');
+// var usersAPI = require('./routes/api/users');
+// var indexAPI = require('./routes/api/index');
 
 var app = express();
 
@@ -90,11 +90,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', index);
-app.use('/users', users);
-app.use('/api/users', helper.auth, usersAPI);
-app.use('/api/', indexAPI);
+// 
+// app.use('/', index);
+// app.use('/users', users);
+// app.use('/api/users', helper.auth, usersAPI);
+// app.use('/api/', indexAPI);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
