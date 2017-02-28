@@ -40,17 +40,37 @@ const bot = new TelegramBot(token, {
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
 bot.onText(/\/start/, function(message) {
-    db.Telegram.create({
-      userid: parseInt(message.chat.id),
-      username: message.chat.username,
-      chatid: message.message_id,
-      firstname: message.chat.first_name,
-      lastname: message.chat.last_name,
-    }).then(() => {
-      bot.sendMessage(message.chat.id, `<Hallo World/> ${message.from.first_name} ! You can ask me anything,`);
-      bot.sendMessage(message.chat.id, `Contoh, kamu siapa ?`);
-    })
+  const chatId = message.chat.id;
 
+  db.Telegram.findOne({
+    where: {
+      userid: parseInt(chatId)
+    }
+  }).then((user) => {
+    if (user == null) {
+      db.Telegram.create({
+        userid: parseInt(message.chat.id),
+        username: message.chat.username,
+        chatid: parseInt(message.message_id),
+        firstname: message.chat.first_name,
+        lastname: message.chat.last_name,
+      }).then(() => {
+        console.log('saved to db');
+      })
+    }
+    bot.sendMessage(message.chat.id, `<Hello  ${message.from.first_name} /> ! You can ask me anything,`);
+  })
+
+});
+
+bot.onText(/\/users/, function(message) {
+    db.Telegram.findAll().then((allUser) => {
+        console.log('all users', allUser);
+        for (let i = 0; i < allUser.length; i++) {
+
+            bot.sendMessage(message.chat.id, allUser[i].firstname);
+        }
+    })
 });
 
 bot.on('message', (msg) => {
@@ -58,15 +78,15 @@ bot.on('message', (msg) => {
 
     console.log('-==------------chatid--------------------', chatId);
     db.Telegram.findOne({
-      where: {
-        userid: parseInt(chatId)
-      }
+        where: {
+            userid: parseInt(chatId)
+        }
     }).then((user) => {
-      console.log('-==------------sama--------------------');
-      db.Chat.create({
-        text:msg.text,
-        chatid: user.id
-      })
+        console.log('-==------------sama--------------------');
+        db.Chat.create({
+            text: msg.text,
+            chatid: user.id
+        })
     })
 
     // send a message to the chat acknowledging receipt of their message
