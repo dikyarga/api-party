@@ -34,41 +34,47 @@ const bot = new TelegramBot(token, {
     polling: true
 });
 
+bot.onText(/\/start/, function(message) {
+    bot.sendMessage(message.chat.id, `<Hallo World/> ${message.from.first_name} You can ask me anything,`
+    );
+    bot.sendMessage(message.chat.id, `Contoh, kamu siapa ?`);
+});
+
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
     // send a message to the chat acknowledging receipt of their message
     var request = appai.textRequest(msg.text, {
-      sessionId: '<unique session id>'
+        sessionId: '<unique session id>'
     });
 
-    let pro = new Promise(function(resolve, reject){
-      request.on('response', function(response) {
-        console.log(response);
-        if (response.result.source == 'agent') {
-          resolve(response)
-        } else {
-          reject('Kamu ngomong apa cuy ?!')
-        }
-      });
+    let pro = new Promise(function(resolve, reject) {
+        request.on('response', function(response) {
+            console.log(response);
+            if (response.result.source == 'agent') {
+                resolve(response)
+            } else {
+                reject('Kamu ngomong apa cuy ?!')
+            }
+        });
     })
 
-    pro.then(function(response){
-      bot.sendMessage(chatId, response.result.fulfillment.speech);
-      // bot.sendMessage(chatId, response.result.fulfillment.messages[0].speech);
-    }).catch(function(msgs){
-      bot.sendMessage(chatId, msgs);
+    pro.then(function(response) {
+        bot.sendMessage(chatId, response.result.fulfillment.speech);
+        // bot.sendMessage(chatId, response.result.fulfillment.messages[0].speech);
+    }).catch(function(msgs) {
+        bot.sendMessage(chatId, msgs);
 
     })
 
     request.on('error', function(error) {
-      console.log(error);
+        console.log(error);
     });
     request.end();
 
     // bot.sendMessage(chatId, 'Hi');
 })
-  //
-  // //
+//
+// //
 
 
 // view engine setup
@@ -79,7 +85,9 @@ app.set('view engine', 'ejs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -90,20 +98,20 @@ app.use('/api/', indexAPI);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;
