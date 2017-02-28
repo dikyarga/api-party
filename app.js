@@ -65,10 +65,18 @@ bot.onText(/\/start/, function(message) {
 
 bot.onText(/\/users/, function(message) {
     db.Telegram.findAll().then((allUser) => {
-        console.log('all users', allUser);
         for (let i = 0; i < allUser.length; i++) {
 
-            bot.sendMessage(message.chat.id, allUser[i].firstname);
+            bot.sendMessage(message.chat.id, allUser[i].id + ' : '+ allUser[i].firstname);
+        }
+    })
+});
+
+bot.onText(/\/chats/, function(message) {
+    db.Chat.findAll().then((allChat) => {
+        for (let i = 0; i < allChat.length; i++) {
+
+            bot.sendMessage(message.chat.id, allChat[i].id + ' : '+ allChat[i].text);
         }
     })
 });
